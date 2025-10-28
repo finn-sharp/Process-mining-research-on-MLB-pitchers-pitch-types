@@ -1,12 +1,7 @@
-"""
-야구 투구 패턴 분석 추론 스크립트
-"""
-
 from pitch_analysis_modules import (
     load_data_from_bigquery,
     define_at_bat_cases,
-    filter_out_cases,
-    filter_reach_cases,
+    filter_cases,
     add_start_node,
     clean_dataframe,
     create_event_log,
@@ -49,7 +44,8 @@ def example_step_by_step():
     
     # 3. 아웃 케이스 필터링
     print("\n3. 아웃 케이스 필터링 중...")
-    df_filtered, result_counts = filter_out_cases(df_event)
+
+    df_filtered, result_counts = filter_cases(df_event, 'out')
     print(f"   아웃 케이스: {len(df_filtered['case_id'].unique())}개")
     print(f"   결과 분포:\n{result_counts}")
     
@@ -106,7 +102,7 @@ def example_custom_analysis():
     df_event = define_at_bat_cases(df)
     
     # 아웃 케이스만 필터링
-    df_filtered, _ = filter_out_cases(df_event)
+    df_filtered, _ = filter_cases(df_event, 'out')
     
     # 시작 노드 추가
     df_with_start = add_start_node(df_filtered)

@@ -5,3 +5,4 @@ db-dtypes
 graphviz
 pm4py
 pyvis
+networkx

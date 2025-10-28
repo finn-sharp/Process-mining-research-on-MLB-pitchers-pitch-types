@@ -4,7 +4,7 @@
 """
 
 from .data_loader import load_data_from_bigquery
-from .case_definer import define_at_bat_cases, filter_out_cases, filter_reach_cases
+from .case_definer import define_at_bat_cases, filter_cases
 from .preprocessor import prepare_timestamps, clean_dataframe
 from .event_log import create_event_log
 from .process_mining import create_process_model
@@ -31,24 +31,14 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
     # 타석 케이스 정의
     df_event = define_at_bat_cases(df)
     
-    # 케이스 타입에 따라 필터링
-    if case_type == 'reach':
-        df_filtered, result_counts = filter_reach_cases(df_event)
-        output_file = "transition_graph_reach.html"
-        num_cases = result_counts.get('reach', 0)
-        num_pitches = len(df_filtered)
-        print(f"\n=== 출루 케이스 분석 ===")
-        print(f"케이스 수: {num_cases:,}개")
-        print(f"투구 수: {num_pitches:,}개")
-    else:
-        df_filtered, result_counts = filter_out_cases(df_event)
-        output_file = "transition_graph_out.html"
-        num_cases = result_counts.get('out', 0)
-        num_pitches = len(df_filtered)
-        print(f"\n=== 아웃 케이스 분석 ===")
-        print(f"케이스 수: {num_cases:,}개")
-        print(f"투구 수: {num_pitches:,}개")
-    
+    # 케이스 타입에 따라 데이터 포인트 필터링
+    df_filtered, result_counts = filter_cases(df_event, case_type)
+    output_file = f"transition_graph_{case_type}.html"
+    num_cases = result_counts.get(case_type, 0)
+    num_pitches = len(df_filtered)
+    print(f"\n=== {case_type.capitalize()} 케이스 분석 ===")
+    print(f"케이스 수: {num_cases:,}개")
+    print(f"투구 수: {num_pitches:,}개")
     print(f"결과 분포:\n{result_counts}")
     
     # Timestamp 준비
