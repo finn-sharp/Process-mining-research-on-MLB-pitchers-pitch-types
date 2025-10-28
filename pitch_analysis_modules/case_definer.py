@@ -3,7 +3,7 @@
 타석을 프로세스 케이스로 정의하고 필터링하는 함수들
 """
 
-from xxlimited import Str
+#from xxlimited import Str
 import pandas as pd
 
 

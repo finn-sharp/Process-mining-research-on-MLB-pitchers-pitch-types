@@ -31,6 +31,10 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
     # 타석 케이스 정의
     df_event = define_at_bat_cases(df)
     
+    # ➕ 여기에 추가
+    from .preprocessor import attach_case_result_to_pitch_type
+    df_event = attach_case_result_to_pitch_type(df_event)
+
     # 케이스 타입에 따라 데이터 포인트 필터링
     df_filtered, result_counts = filter_cases(df_event, case_type)
     output_file = f"transition_graph_{case_type}.html"

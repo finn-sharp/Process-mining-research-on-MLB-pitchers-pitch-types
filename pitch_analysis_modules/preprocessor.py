@@ -83,6 +83,37 @@ def add_start_node(df_event):
     return df_with_start
 
 
+def attach_case_result_to_pitch_type(df_event):
+    """
+    각 투구의 pitch_type에 해당 타석의 최종 결과(out / reach / other)를 붙임
+    예: SL → SL_out, SI → SI_reach
+    """
+    # case_id별 마지막 이벤트 기반으로 결과 분류
+    case_results = df_event.groupby('case_id')['events'].apply(
+        lambda x: x.dropna().iloc[-1] if len(x.dropna()) > 0 else None
+    )
+
+    def classify_result(event):
+        if event in ['strikeout', 'out', 'field_out', 'force_out', 'double_play', 'triple_play',
+                     'strikeout_double_play', 'sac_fly', 'sac_bunt']:
+            return 'out'
+        elif event in ['single', 'double', 'triple', 'home_run', 'walk', 'hit_by_pitch',
+                       'catcher_interf', 'field_error', 'fielders_choice']:
+            return 'reach'
+        else:
+            return 'other'
+
+    case_results = case_results.apply(classify_result)
+
+    # 원본 DataFrame에 결과 병합
+    df_event = df_event.merge(case_results.rename('case_result'), on='case_id', how='left')
+
+    # pitch_type + 결과 결합
+    df_event['pitch_type'] = df_event['pitch_type'] + '_' + df_event['case_result']
+
+    return df_event
+
+
 def clean_dataframe(df_event):
     """
     DataFrame에서 None 값 완전히 제거
