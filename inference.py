@@ -1,7 +1,7 @@
 from pitch_analysis_modules import (
     load_data_from_bigquery,
     define_at_bat_cases,
-    filter_cases,
+    one_way_filter,
     add_start_node,
     clean_dataframe,
     create_event_log,
@@ -37,16 +37,19 @@ def example_step_by_step():
     df = load_data_from_bigquery(key_path="key.json", limit=1000)
     print(f"   로드된 데이터: {len(df)}행")
     
-    # 2. 타석 케이스 정의
-    print("\n2. 타석 케이스 정의 중...")
+    # 2. 프로세스 라벨링
+    print("\n2. 프로세스 별 라벨링 작업 중...")
     df_event = define_at_bat_cases(df)
-    print(f"   총 타석 수: {df_event['case_id'].nunique()}")
+    print(f"   총 타석 수: {df_event['processID'].nunique()}")
     
-    # 3. 아웃 케이스 필터링
-    print("\n3. 아웃 케이스 필터링 중...")
-
-    df_filtered, result_counts = filter_cases(df_event, 'out')
-    print(f"   아웃 케이스: {len(df_filtered['case_id'].unique())}개")
+    # 3. 데이터 필터링
+    print("\n3. 사용자 정의 필터 작업 중...")
+    filter = {}
+    filter['colName'] = 'events'
+    filter['posCondition'] = ['strikeout']
+    
+    df_filtered, result_counts = one_way_filter(df_event, **filter)
+    print(f"   케이스: {len(df_filtered['case_id'].unique())}개")
     print(f"   결과 분포:\n{result_counts}")
     
     # 4. 시작 노드 추가
@@ -102,7 +105,11 @@ def example_custom_analysis():
     df_event = define_at_bat_cases(df)
     
     # 아웃 케이스만 필터링
-    df_filtered, _ = filter_cases(df_event, 'out')
+    filter = {}
+    filter['colName'] = 'events'
+    filter['posCondition'] = ['strikeout']
+    
+    df_filtered, _ = one_way_filter(df_event, **filter)    
     
     # 시작 노드 추가
     df_with_start = add_start_node(df_filtered)
@@ -131,20 +138,30 @@ def example_custom_analysis():
 
 if __name__ == "__main__":
     # 원하는 방법 선택해서 실행
-    print("=== 아웃 케이스 분석 ===")
+    filter_out = {}
+    filter_out['colName'] = 'events'
+    filter_out['posCondition'] = ['strikeout']
+
+    print("=== One-Way Filted Case Process Mining ===")
     results_out = analyze_pitching_patterns(
         key_path="key.json",
         limit=None,  # 전체 데이터 사용
         min_prob=0.05,
-        case_type='out'
-    )
+        case_type='out',
+        filter=filter_out
+        )
     
+    filter_reach = {}
+    filter_reach['colName'] = 'events'
+    filter_reach['posCondition'] = ['walk', 'single', 'double', 'triple', 'home_run']
+
     print("\n=== 출루 케이스 분석 ===")
     results_reach = analyze_pitching_patterns(
         key_path="key.json",
         limit=None,  # 전체 데이터 사용
         min_prob=0.05,
-        case_type='reach'
+        case_type='reach',
+        filter=filter_reach
     )
     
     # 전이 확률 비교 및 Loss 계산

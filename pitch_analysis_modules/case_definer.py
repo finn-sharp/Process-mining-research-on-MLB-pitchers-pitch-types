@@ -71,58 +71,18 @@ def define_at_bat_cases(df):
     return df_event
 
 
-def filter_cases(df_event, case, out_events=None, reach_events=None):
-    """
-    출루/아웃으로 끝나는 타석만 필터링
-    
-    Args:
-        df_event: 케이스가 정의된 DataFrame
-        case: 분류할 케이스 타입 ('out' 또는 'reach')
-        out_events: 아웃 이벤트 리스트
-        reach_events: 출루 이벤트 리스트
-    
-    Returns:
-        DataFrame: 아웃으로 끝나는 타석만 포함된 DataFrame
-    """
+def one_way_filter(df, colName = 'events', posCondition = ['strikeout']):
 
-    # [ Target :  아웃 이벤트 리스트 설정 ]
-    if out_events is None:
-        out_events = ['strikeout', 'out', 'field_out', 'force_out', 'double_play', 'triple_play', 
-                      'strikeout_double_play', 'sac_fly', 'sac_bunt']
-    
-    # [ Target : 출루 이벤트 리스트 설정 ]
-    if reach_events is None:
-        reach_events = ['single', 'double', 'triple', 'home_run', 'walk', 'hit_by_pitch', 
-                        'catcher_interf', 'field_error', 'fielders_choice']
-    
-    def classify_case_result(case_df):
-        """타석의 마지막 이벤트로 결과 분류"""
-        if len(case_df) == 0:
-            return 'unknown'
-        
-        # 마지막 유효한 이벤트 찾기 (NaN이 아닌 것 중에서)
-        events_series = case_df['events'].dropna()
-        if len(events_series) == 0:
-            return 'ongoing'
-        
-        last_event = events_series.iloc[-1]
-        
-        if last_event in out_events:
-            return 'out'
-        elif last_event in reach_events:
-            return 'reach'
-        else:
-            return 'other'
-    
-    # [ 필터링 결과 분류 ] - 각 case_id별로 결과 분류
-    case_results = df_event.groupby('case_id', group_keys=False).apply(
-        lambda x: pd.Series([classify_case_result(x)], index=[x.name])
-    )
-    
-    # [ 필터링 ] - 아웃으로 끝나는 케이스만 필터링
-    out_case_ids = case_results[case_results == case].index.tolist()
-    df_filtered = df_event[df_event['case_id'].isin(out_case_ids)].copy()
-    
-    return df_filtered, case_results.value_counts()
+    # 1. 조건에 걸리는 행만 추출
+    condition = df[colName].isin(posCondition)
+    df_filtered = df[condition]
+
+    # 2. 조건에 걸리는 행의 processID 추출
+    processID_list = df_filtered['processID'].unique()
+
+    # 3. 조건에 걸리는 행의 processID로 케이스 필터링
+    df_filtered = df[df['processID'].isin(processID_list)]
+
+    return df_filtered
 
 

@@ -4,7 +4,7 @@
 """
 
 from .data_loader import load_data_from_bigquery
-from .case_definer import define_at_bat_cases, filter_cases
+from .case_definer import define_at_bat_cases, one_way_filter
 from .preprocessor import prepare_timestamps, clean_dataframe, add_end_node
 from .event_log import create_event_log
 from .process_mining import create_process_model
@@ -12,7 +12,7 @@ from .transition_analyzer import calculate_transition_probabilities
 from .visualizer import visualize_transition_graph_pyvis
 
 
-def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, case_type='out'):
+def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, case_type='out', filter=None):
     """
     전체 분석 파이프라인 실행
     
@@ -31,19 +31,27 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
     # 타석 케이스 정의
     df_event = define_at_bat_cases(df)
     
-    # ➕ 여기에 추가
+    #######
+    #######
+    #######
+    ####### pm4py에서 제공하는 패턴으로 변경해야할 부분
+    #######
+    #######
     from .preprocessor import attach_case_result_to_pitch_type
     df_event = attach_case_result_to_pitch_type(df_event)
 
-    # 케이스 타입에 따라 데이터 포인트 필터링
-    df_filtered, result_counts = filter_cases(df_event, case_type)
-    output_file = f"transition_graph_{case_type}.html"
-    num_cases = result_counts.get(case_type, 0)
-    num_pitches = len(df_filtered)
-    print(f"\n=== {case_type.capitalize()} 케이스 분석 ===")
-    print(f"케이스 수: {num_cases:,}개")
-    print(f"투구 수: {num_pitches:,}개")
-    print(f"결과 분포:\n{result_counts}")
+    if filter is None :
+        pass
+    else : 
+        # 케이스 타입에 따라 데이터 포인트 필터링
+        df_filtered, result_counts = one_way_filter(df_event, **filter)
+        output_file = f"transition_graph_{case_type}.html"
+        num_cases = result_counts.get(case_type, 0)
+        num_pitches = len(df_filtered)
+        print(f"\n=== {case_type.capitalize()} 케이스 분석 ===")
+        print(f"케이스 수: {num_cases:,}개")
+        print(f"투구 수: {num_pitches:,}개")
+        print(f"결과 분포:\n{result_counts}")
     
     # Timestamp 준비
     df_with_timestamps = prepare_timestamps(df_filtered)
