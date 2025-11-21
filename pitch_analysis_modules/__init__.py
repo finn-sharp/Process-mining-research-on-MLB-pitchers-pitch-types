@@ -13,7 +13,7 @@ from .data_loader import load_data_from_bigquery
 from .case_definer import define_at_bat_cases, filter_cases
 
 # 전처리
-from .preprocessor import prepare_timestamps, add_start_node, clean_dataframe
+from .preprocessor import prepare_timestamps, add_start_node, clean_dataframe, add_end_node
 
 # 이벤트 로그
 from .event_log import create_event_log
@@ -49,6 +49,7 @@ __all__ = [
     'prepare_timestamps',
     'add_start_node',
     'clean_dataframe',
+    'add_end_node'
     
     # 이벤트 로그
     'create_event_log',

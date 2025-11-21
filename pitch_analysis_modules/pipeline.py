@@ -5,7 +5,7 @@
 
 from .data_loader import load_data_from_bigquery
 from .case_definer import define_at_bat_cases, filter_cases
-from .preprocessor import prepare_timestamps, clean_dataframe
+from .preprocessor import prepare_timestamps, clean_dataframe, add_end_node
 from .event_log import create_event_log
 from .process_mining import create_process_model
 from .transition_analyzer import calculate_transition_probabilities
@@ -31,6 +31,10 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
     # 타석 케이스 정의
     df_event = define_at_bat_cases(df)
     
+    # ➕ 여기에 추가
+    from .preprocessor import attach_case_result_to_pitch_type
+    df_event = attach_case_result_to_pitch_type(df_event)
+
     # 케이스 타입에 따라 데이터 포인트 필터링
     df_filtered, result_counts = filter_cases(df_event, case_type)
     output_file = f"transition_graph_{case_type}.html"
@@ -44,6 +48,10 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
     # Timestamp 준비
     df_with_timestamps = prepare_timestamps(df_filtered)
     
+    # 🎯 타석 종료 노드 추가 (타석 순서때문에 첨가한 코드 )------
+    df_with_timestamps = add_end_node(df_with_timestamps)
+    # --------------------------------------------------------
+
     # 데이터 정리
     df_clean = clean_dataframe(df_with_timestamps)
     
