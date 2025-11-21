@@ -43,8 +43,7 @@ __all__ = [
     
     # 케이스 정의
     'define_at_bat_cases',
-    'filter_out_cases',
-    'filter_reach_cases',
+    'filter_cases',
     
     # 전처리
     'prepare_timestamps',
