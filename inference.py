@@ -4,7 +4,7 @@ from pitch_analysis_modules import (
     one_way_filter,
     addNodeAndPreprocess,
     prepareEventLog,
-    create_event_log,
+    createEventLogFromDataFrame,
     create_process_model,
     calculate_transition_probabilities,
     visualize_transition_graph_pyvis,
@@ -66,7 +66,7 @@ def example_step_by_step():
     
     # 6. 이벤트 로그 생성
     print("\n6. 이벤트 로그 생성 중...")
-    event_log = create_event_log(df_clean)
+    event_log = createEventLogFromDataFrame(df_clean)
     print(f"   이벤트 로그 케이스 수: {len(event_log)}")
     
     # 7. 프로세스 모델 생성
@@ -116,13 +116,13 @@ def example_custom_analysis():
     # 시작 노드 추가
     start_name = 'In'
     end_name = 'Out'
-    df_with_start = addNodeAndTimestamp(df_filtered, start_name, end_name)
+    df_with_start = addNodeAndPreprocess(df_filtered, start_name, end_name)
     
     # 데이터 정리
-    df_clean = clean_dataframe(df_with_start)
+    df_clean = prepareEventLog(df_with_start)
     
     # 이벤트 로그 생성
-    event_log = create_event_log(df_clean)
+    event_log = createEventLogFromDataFrame(df_clean)
     
     # 전이 확률만 계산 (시각화 없이)
     transition_probs, transition_counts = calculate_transition_probabilities(event_log)
@@ -177,11 +177,11 @@ if __name__ == "__main__":
         results_reach['transition_counts']
     )
     
-    print_comparison_summary(
-        comparison,
-        num_out_cases=results_out['num_cases'],
-        num_reach_cases=results_reach['num_cases']
-    )
+    # print_comparison_summary(
+    #     comparison,
+    #     num_out_cases=results_out['num_cases'],
+    #     num_reach_cases=results_reach['num_cases']
+    # )
     
     # 또는
     # print("=== 단계별 실행 ===")

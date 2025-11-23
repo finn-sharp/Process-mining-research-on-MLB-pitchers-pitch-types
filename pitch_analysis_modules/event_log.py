@@ -45,7 +45,7 @@ def clean_event_log(log):
     return cleaned_log
 
 
-def create_event_log(df_clean):
+def createEventLogFromDataFrame(df_clean):
     """
     DataFrame을 PM4Py 이벤트 로그로 변환
     
@@ -55,10 +55,9 @@ def create_event_log(df_clean):
     Returns:
         EventLog: PM4Py 이벤트 로그
     """
-    # Timestamp 변환
+
+    # Timestamp 변환 & 이벤트 로그 변환
     df_clean = dataframe_utils.convert_timestamp_columns_in_df(df_clean)
-    
-    # 이벤트 로그 변환
     event_log = log_converter.apply(df_clean)
     
     # None 값 제거

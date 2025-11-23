@@ -16,7 +16,7 @@ from .case_definer import define_at_bat_cases, one_way_filter
 from .preprocessor import prepareEventLog, addNodeAndPreprocess
 
 # 이벤트 로그
-from .event_log import create_event_log
+from .event_log import createEventLogFromDataFrame
 
 # 프로세스 마이닝
 from .process_mining import create_process_model
@@ -50,7 +50,7 @@ __all__ = [
     'prepareEventLog',
     
     # 이벤트 로그
-    'create_event_log',
+    'createEventLogFromDataFrame',
     
     # 프로세스 마이닝
     'create_process_model',

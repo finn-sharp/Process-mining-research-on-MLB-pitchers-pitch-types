@@ -63,7 +63,7 @@ def addNodeAndPreprocess(df_event, start_name, end_name):
     # [3] pm4py용 EventLog 포맷으로 변경 (Timestamp, CaseID, Activity)
     acept_data['time:timestamp'] = acept_data.apply(lambda row: row['game_date'] + timedelta(seconds=row['pitchOrder']),axis=1)
     acept_data['case:concept:name'] = acept_data['processID']
-    acept_data['concept:name'] = acept_data['description_group'].astype(str) + " - " + acept_data['pitch_type'].astype(str)
+    acept_data['concept:name'] = acept_data['grouped_description'].astype(str) + " - " + acept_data['pitch_type'].astype(str)
     
     # [4] 시작/종료 노드 추가
     start_name = start_name
@@ -77,13 +77,15 @@ def addNodeAndPreprocess(df_event, start_name, end_name):
             first_row = case_df.iloc[-1].copy()
             first_row['time:timestamp'] = first_row['time:timestamp'] - timedelta(seconds=1)
             first_row['case:concept:name'] = first_row['processID']
-            first_row['concept:name'], first_row['pitch_type'] = start_name
+            first_row['concept:name'] = start_name
+            first_row['pitch_type'] = start_name
             first_row['pitchOrder'] = -1  # 시작 노드는 -1로 설정
         
             last_row = case_df.iloc[0].copy()
             last_row['time:timestamp'] = last_row['time:timestamp'] + timedelta(seconds=1)
             last_row['case:concept:name'] = last_row['processID']
-            last_row['concept:name'], last_row['pitch_type'] = end_name
+            last_row['concept:name'] = end_name
+            last_row['pitch_type'] = end_name
             last_row['pitchOrder'] = len(case_df)
             
             add_node_list.extend([first_row, last_row])
@@ -131,7 +133,7 @@ def attach_case_result_to_pitch_type(df_event):
     예: SL → SL_out, SI → SI_reach
     """
     # case_id별 마지막 이벤트 기반으로 결과 분류
-    case_results = df_event.groupby('case_id')['events'].apply(
+    case_results = df_event.groupby('processID')['events'].apply(
         lambda x: x.dropna().iloc[-1] if len(x.dropna()) > 0 else None
     )
 
@@ -148,7 +150,7 @@ def attach_case_result_to_pitch_type(df_event):
     case_results = case_results.apply(classify_result)
 
     # 원본 DataFrame에 결과 병합
-    df_event = df_event.merge(case_results.rename('case_result'), on='case_id', how='left')
+    df_event = df_event.merge(case_results.rename('case_result'), on='processID', how='left')
 
     # pitch_type + 결과 결합
     df_event['pitch_type'] = df_event['pitch_type'] + '_' + df_event['case_result']

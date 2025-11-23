@@ -6,7 +6,7 @@
 from .data_loader import load_data_from_bigquery
 from .case_definer import define_at_bat_cases, one_way_filter
 from .preprocessor import prepareEventLog, addNodeAndPreprocess
-from .event_log import create_event_log
+from .event_log import createEventLogFromDataFrame
 from .process_mining import create_process_model
 from .transition_analyzer import calculate_transition_probabilities
 from .visualizer import visualize_transition_graph_pyvis
@@ -44,14 +44,8 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
         pass
     else : 
         # 케이스 타입에 따라 데이터 포인트 필터링
-        df_filtered, result_counts = one_way_filter(df_event, **filter)
+        df_filtered = one_way_filter(df_event, **filter)
         output_file = f"transition_graph_{case_type}.html"
-        num_cases = result_counts.get(case_type, 0)
-        num_pitches = len(df_filtered)
-        print(f"\n=== {case_type.capitalize()} 케이스 분석 ===")
-        print(f"케이스 수: {num_cases:,}개")
-        print(f"투구 수: {num_pitches:,}개")
-        print(f"결과 분포:\n{result_counts}")
     
     # 시작/종료 노드 추가 및 pm4py 필수 컬럼 생성
     df_node_added = addNodeAndPreprocess(df_filtered, start_name=start_name, end_name=end_name)
@@ -60,7 +54,7 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
     df_clean = prepareEventLog(df_node_added)
     
     # 이벤트 로그 생성
-    event_log = create_event_log(df_clean)
+    event_log = createEventLogFromDataFrame(df_clean)
     
     # 전이 확률 계산
     transition_probs, transition_counts = calculate_transition_probabilities(event_log)
@@ -84,8 +78,8 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
         'transition_probs': transition_probs,
         'transition_counts': transition_counts,
         'case_type': case_type,
-        'result_counts': result_counts,
-        'num_cases': num_cases,
-        'num_pitches': num_pitches
+        # 'result_counts': result_counts,
+        # 'num_cases': num_cases,
+        # 'num_pitches': num_pitches
     }
 
