@@ -13,7 +13,7 @@ from .data_loader import load_data_from_bigquery
 from .case_definer import define_at_bat_cases, one_way_filter
 
 # 전처리
-from .preprocessor import clean_dataframe, addNodeAndTimestamp
+from .preprocessor import prepareEventLog, addNodeAndPreprocess
 
 # 이벤트 로그
 from .event_log import create_event_log
@@ -46,8 +46,8 @@ __all__ = [
     'one_way_filter',
     
     # 전처리
-    'addNodeAndTimestamp',
-    'clean_dataframe',
+    'addNodeAndPreprocess',
+    'prepareEventLog',
     
     # 이벤트 로그
     'create_event_log',

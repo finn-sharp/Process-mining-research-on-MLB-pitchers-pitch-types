@@ -2,8 +2,8 @@ from pitch_analysis_modules import (
     load_data_from_bigquery,
     define_at_bat_cases,
     one_way_filter,
-    addNodeAndTimestamp,
-    clean_dataframe,
+    addNodeAndPreprocess,
+    prepareEventLog,
     create_event_log,
     create_process_model,
     calculate_transition_probabilities,
@@ -52,17 +52,17 @@ def example_step_by_step():
     print(f"   케이스: {len(df_filtered['case_id'].unique())}개")
     print(f"   결과 분포:\n{result_counts}")
     
-    # 4. 시작 및 종료 노드 추가
+    # 4. 노드 추가 및 pm4py 필수 컬럼 생성
     start_name = 'In'
     end_name = 'Out'
-    print("\n4. 시작 및 종료 노드 추가 중...")
-    df_with_start = addNodeAndTimestamp(df_filtered, start_name, end_name)
-    print(f"   시작 및 종료 노드 추가 완료")
+    print("\n4. 시작 및 종료 노드 추가 및 pm4py 필수 컬럼 생성 중...")
+    df_with_start = addNodeAndPreprocess(df_filtered, start_name, end_name)
+    print(f"   시작 및 종료 노드 추가 및 pm4py 필수 컬럼 생성 완료")
     
-    # 5. 데이터 정리
-    print("\n5. 데이터 정리 중...")
-    df_clean = clean_dataframe(df_with_start)
-    print(f"   정리 후 데이터: {len(df_clean)}행")
+    # 5. pm4py 포멧 변경
+    print("\n5. pm4py 포멧 변경 중...")
+    df_clean = prepareEventLog(df_with_start)
+    print(f"   변경 후 pm4py 포멧: {len(df_clean)}행")
     
     # 6. 이벤트 로그 생성
     print("\n6. 이벤트 로그 생성 중...")

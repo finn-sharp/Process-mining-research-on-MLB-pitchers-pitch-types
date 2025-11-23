@@ -5,14 +5,14 @@
 
 from .data_loader import load_data_from_bigquery
 from .case_definer import define_at_bat_cases, one_way_filter
-from .preprocessor import prepare_timestamps, clean_dataframe, add_end_node
+from .preprocessor import prepareEventLog, addNodeAndPreprocess
 from .event_log import create_event_log
 from .process_mining import create_process_model
 from .transition_analyzer import calculate_transition_probabilities
 from .visualizer import visualize_transition_graph_pyvis
 
 
-def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, case_type='out', filter=None):
+def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, case_type='out', filter=None, start_name='In', end_name='Out'):
     """
     전체 분석 파이프라인 실행
     
@@ -53,15 +53,11 @@ def analyze_pitching_patterns(key_path="key.json", limit=None, min_prob=0.05, ca
         print(f"투구 수: {num_pitches:,}개")
         print(f"결과 분포:\n{result_counts}")
     
-    # Timestamp 준비
-    df_with_timestamps = prepare_timestamps(df_filtered)
+    # 시작/종료 노드 추가 및 pm4py 필수 컬럼 생성
+    df_node_added = addNodeAndPreprocess(df_filtered, start_name=start_name, end_name=end_name)
     
-    # 🎯 타석 종료 노드 추가 (타석 순서때문에 첨가한 코드 )------
-    df_with_timestamps = add_end_node(df_with_timestamps)
-    # --------------------------------------------------------
-
-    # 데이터 정리
-    df_clean = clean_dataframe(df_with_timestamps)
+    # pm4py 포멧 변경
+    df_clean = prepareEventLog(df_node_added)
     
     # 이벤트 로그 생성
     event_log = create_event_log(df_clean)
