@@ -13,6 +13,10 @@ from .pipeline import one_step_EDA_from_bigquery
 from .pipeline import one_step_EDA_from_csv
 
 from .probability import BasedTraces
+from .probability import prepare_eventLog
+from .probability import create_eventlog_from_dataFrame
+
+
 from .exploratory import ProcessEDA
 
 from .visualizer import sankey_visualizer
@@ -28,7 +32,9 @@ __all__ = [
     'preprocessing_df',
     'one_step_EDA_from_bigquery',
     'one_step_EDA_from_csv',
-    'BasedTraces'
+    'BasedTraces',
+    'prepare_eventLog',
+    'create_eventlog_from_dataFrame',
     'ProcessEDA',
     'sankey_visualizer',
     'interactive_graph',
